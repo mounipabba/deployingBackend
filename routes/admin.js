@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const { Readable } = require("stream");
+const Quiz= require("../models/Quiz");
 const Question = require("../models/Question");
 const Syllabus = require("../models/Syllabus");
 const Material = require("../models/Material"); // new model for materials
@@ -280,6 +281,7 @@ router.get("/results/:subject", async (req, res) => {
     res.status(500).json({ message: "Server error while fetching results." });
   }
 });
+
 
 
 
