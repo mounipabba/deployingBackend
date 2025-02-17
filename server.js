@@ -13,12 +13,25 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Apply CORS middleware BEFORE defining routes
-app.use(
-  cors({
-    origin: "http://localhost:3000", // Allow this origin
-    credentials: true,              // Allow cookies/credentials
-  })
-);
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://deploying-full-stack-six.vercel.app",
+];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 
 // Also, if you want to handle preflight requests:
 app.options("*", cors());
