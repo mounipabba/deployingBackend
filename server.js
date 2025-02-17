@@ -17,7 +17,7 @@ const PORT = process.env.PORT || 5000;
 // ✅ CORS Configuration: Allow both Localhost and Deployed Frontend
 app.use(
   cors({
-    origin: "https://deploying-full-stack-buoeq7ymx.vercel.app",
+    origin: "deploying-full-stack-sigma.vercel.app",
     credentials: true, // Allow cookies/auth headers
     methods: ["GET", "POST", "PUT", "DELETE"], // Allowed methods
     allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
