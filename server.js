@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
-const cors = require("cors"); // Import CORS
+const cors = require("cors");
 const path = require("path");
 
 const authRouter = require("./routes/auth");
@@ -14,10 +14,24 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ✅ CORS Configuration: Allow both Localhost and Deployed Frontend
+// ✅ Define Allowed Origins
+const allowedOrigins = [
+  "http://localhost:3000", // Local development (adjust port if needed)
+  "https://deploying-full-stack-sigma.vercel.app", // Deployed frontend with correct protocol
+];
+
+// ✅ CORS Configuration: Dynamically allow requests from whitelisted origins
 app.use(
   cors({
-    origin: "deploying-full-stack-sigma.vercel.app",
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true, // Allow cookies/auth headers
     methods: ["GET", "POST", "PUT", "DELETE"], // Allowed methods
     allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
@@ -27,7 +41,7 @@ app.use(
 // ✅ Handle Preflight Requests Properly
 app.options("*", cors());
 
-// ✅ Serve Static Files (Ensure `manifest.json` Loads Properly)
+// ✅ Serve Static Files (ensures files like `manifest.json` load properly)
 app.use(express.static(path.join(__dirname, "public")));
 
 // ✅ Middleware to Parse JSON Requests
