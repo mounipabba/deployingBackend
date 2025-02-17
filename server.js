@@ -1,7 +1,9 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
-const cors = require("cors"); // Import cors
+const cors = require("cors"); // Import CORS
+const path = require("path");
+
 const authRouter = require("./routes/auth");
 const quizRouter = require("./routes/quiz");
 const userRouter = require("./routes/user");
@@ -12,47 +14,49 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Apply CORS middleware BEFORE defining routes
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://deploying-full-stack-six.vercel.app",
-];
+// ✅ CORS Configuration: Allow both Localhost and Deployed Frontend
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "https://deploying-full-stack-buoeq7ymx.vercel.app",
+    ],
+    credentials: true, // Allow cookies/auth headers
+    methods: ["GET", "POST", "PUT", "DELETE"], // Allowed methods
+    allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
+  })
+);
 
-const corsOptions = {
-  origin: function (origin, callback) {
-    // allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-};
-
-app.use(cors(corsOptions));
-
-// Also, if you want to handle preflight requests:
+// ✅ Handle Preflight Requests Properly
 app.options("*", cors());
 
+// ✅ Serve Static Files (Ensure `manifest.json` Loads Properly)
+app.use(express.static(path.join(__dirname, "public")));
+
+// ✅ Middleware to Parse JSON Requests
 app.use(express.json());
 
-// Define your routes
+// ✅ Define API Routes
 app.use("/api/auth", authRouter);
 app.use("/api/quiz", quizRouter);
 app.use("/api/user", userRouter);
 app.use("/api/admin", adminRouter);
 
-
-// Connect to MongoDB
+// ✅ Connect to MongoDB
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
-    console.log("MongoDB connected");
+    console.log("✅ MongoDB connected");
   })
-  .catch((err) => console.log("MongoDB connection error:", err));
+  .catch((err) => console.error("❌ MongoDB connection error:", err));
 
+// ✅ Global Error Handling Middleware (Improves Debugging)
+app.use((err, req, res, next) => {
+  console.error("🔥 Server Error:", err);
+  res.status(500).json({ error: "Internal Server Error" });
+});
+
+// ✅ Start Server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
